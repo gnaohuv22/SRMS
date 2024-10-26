@@ -1,0 +1,49 @@
+﻿@model IEnumerable<FormAPI.DTO.FormDto>
+
+@{
+    ViewData["Title"] = "Forms";
+}
+
+<h2>Forms</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Form ID</th>
+            <th>Student Email</th>
+            <th>Category Name</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var form in Model)
+        {
+            <tr>
+                <td>@form.FormId</td>
+                <td>@form.StudentEmail</td>
+                <td>@form.CategoryName</td>
+                <td>@form.Subject</td>
+                <td>@form.Status</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@form.FormId">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@form.FormId">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@form.FormId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-primary">Create New Form</a>
