@@ -2,15 +2,8 @@ using DataAccess;
 using FormAPI.DTO;
 using FormAPI.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Repositories;
-using SharedAuth;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,18 +58,10 @@ builder.Services.AddAuthorization(options =>
 });
 
 // Register DAOs
-builder.Services.AddScoped<FormDAO>();
-builder.Services.AddScoped<DepartmentDAO>();
-builder.Services.AddScoped<CategoryDAO>();
-builder.Services.AddScoped<ResponseDAO>();
-builder.Services.AddScoped<UserDAO>();
-
-//Add Repositories
-builder.Services.AddScoped<IFormRepository, FormRepository>();
-builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IResponseRepository, ResponseRepository>();
+builder.Services.AddScoped<FormService>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<ResponseService>();
+builder.Services.AddScoped<UserService>();
 
 builder.Services.AddTransient<IAuthentication, Authentication>();
 

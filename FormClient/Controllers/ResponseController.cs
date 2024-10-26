@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using FormAPI.DTO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BusinessObject;
 
 public class ResponseController : Controller
 {
@@ -73,18 +74,31 @@ public class ResponseController : Controller
         }
     }
 
-    // GET: Response/Create
-    [Authorize(Roles = "Admin")]
-    public IActionResult Create()
+    // GET: Response/Reply/5
+    [Authorize(Roles = "Department")]
+    public async Task<IActionResult> Reply(int formId)
     {
-        return View();
+        var formResponse = await _httpClient.GetAsync($"{_apiBaseUrl}/forms/{formId}");
+        if (formResponse.IsSuccessStatusCode)
+        {
+            var formDto = await formResponse.Content.ReadFromJsonAsync<FormDto>();
+            var responseDto = new ResponseDto
+            {
+                FormId = formDto.FormId,
+                FormSubject = formDto.Subject,
+                FormContent = formDto.Content,
+                CreatedAt = DateTime.Now
+            };
+            return View(responseDto);
+        }
+        else return NotFound();
     }
 
     // POST: Response/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create(ResponseDto responseDto)
+    [Authorize(Roles = "Department")]
+    public async Task<IActionResult> Reply(ResponseDto responseDto)
     {
         if (!ModelState.IsValid)
         {
@@ -93,11 +107,21 @@ public class ResponseController : Controller
 
         try
         {
+            var formResponse = await _httpClient.GetFromJsonAsync<FormDto>($"{_apiBaseUrl}/forms/{responseDto.FormId}");
+            if (formResponse == null)
+            {
+                TempData["Error"] = "Form not found.";
+                return NotFound();
+            }
+
+            formResponse.Status = FormStatus.Processing;
+            await _httpClient.PutAsJsonAsync($"{_apiBaseUrl}/forms/{responseDto.FormId}", formResponse);
+
             var response = await _httpClient.PostAsJsonAsync($"{_apiBaseUrl}/responses", responseDto);
             if (response.IsSuccessStatusCode)
             {
                 TempData["Success"] = "Response created successfully.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Form");
             }
 
             _logger.LogError("Failed to create response. Status code: {StatusCode}", response.StatusCode);
@@ -112,8 +136,53 @@ public class ResponseController : Controller
         }
     }
 
+    [HttpPost]
+    [Authorize(Roles = "Department")]
+    public async Task<IActionResult> UpdateStatus(int id, string status, string reason)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{_apiBaseUrl}/responses/{id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Response not found.";
+                return NotFound();
+            }
+
+            var responseDto = await response.Content.ReadFromJsonAsync<ResponseDto>();
+            responseDto.Content = $"Update at: {DateTime.Now}\n{reason}\n\n{responseDto.Content}";
+
+            var formResponse = await _httpClient.GetFromJsonAsync<FormDto>($"{_apiBaseUrl}/forms/{responseDto.FormId}");
+            if (formResponse == null)
+            {
+                TempData["Error"] = "Form not found.";
+                return NotFound();
+            }
+            formResponse.Status = status == "Accepted" ? FormStatus.Accepted : FormStatus.Rejected;
+
+            var updateResponse = await _httpClient.PutAsJsonAsync($"{_apiBaseUrl}/responses/{id}", responseDto);
+            var updateForm = await _httpClient.PutAsJsonAsync($"{_apiBaseUrl}/forms/{responseDto.FormId}", formResponse);
+
+            if (updateResponse.IsSuccessStatusCode && updateForm.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "Response updated successfully.";
+                return RedirectToAction("Index");
+            }
+
+            _logger.LogError("Failed to update response. Status code: {StatusCode}", updateResponse.StatusCode);
+            TempData["Error"] = "Failed to update response.";
+            return RedirectToAction("Index");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while updating response with ID {ResponseId}", id);
+            TempData["Error"] = "An error occurred while updating the response.";
+            return RedirectToAction("Index");
+        }
+    }
+
     // GET: Response/Edit/5
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Department")]
     public async Task<IActionResult> Edit(int id)
     {
         try

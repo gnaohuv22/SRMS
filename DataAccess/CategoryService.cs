@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess
 {
-    public class CategoryDAO
+    public class CategoryService
     {
         private readonly ApplicationDbContext _context;
 
-        public CategoryDAO(ApplicationDbContext context)
+        public CategoryService(ApplicationDbContext context)
         {
             _context = context;
         }

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Repositories;
 using BusinessObject;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,6 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using DataAccess;
 
 namespace FormAPI.Controllers
 {
@@ -19,18 +19,18 @@ namespace FormAPI.Controllers
     [ApiController]
     public class UserApiController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
+        private readonly UserService _userService;
         private readonly IMapper _mapper;
         private readonly ILogger<UserApiController> _logger;
         private readonly IAuthentication _authentication;
 
         public UserApiController(
-            IUserRepository userRepository,
+            UserService userService,
             IMapper mapper,
             ILogger<UserApiController> logger, 
             IAuthentication authentication)
         {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _authentication = authentication ?? throw new ArgumentNullException(nameof(authentication));
@@ -42,7 +42,7 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var users = await _userRepository.GetAllUsers();
+                var users = await _userService.GetAllUsers();
                 return Ok(_mapper.Map<IEnumerable<UserDto>>(users));
             }
             catch (Exception ex)
@@ -58,7 +58,7 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var users = await _userRepository.GetAllUsersByRole(role);
+                var users = await _userService.GetAllUsersByRole(role);
                 return Ok(_mapper.Map<IEnumerable<UserDto>>(users));
             }
             catch (Exception ex)
@@ -75,7 +75,7 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var user = await _userRepository.GetUserById(id);
+                var user = await _userService.GetUserById(id);
                 if (user == null)
                 {
                     return NotFound($"User with ID {id} not found");
@@ -140,7 +140,7 @@ namespace FormAPI.Controllers
                 }
 
                 var user = _mapper.Map<User>(userDto);
-                await _userRepository.AddUser(user);
+                await _userService.AddUser(user);
 
                 var createdUser = _mapper.Map<UserDto>(user);
                 return CreatedAtAction(
@@ -169,7 +169,7 @@ namespace FormAPI.Controllers
                     return BadRequest("ID mismatch");
                 }
 
-                var existingUser = await _userRepository.GetUserById(id);
+                var existingUser = await _userService.GetUserById(id);
                 if (existingUser == null)
                 {
                     return NotFound($"User with ID {id} not found");
@@ -185,7 +185,7 @@ namespace FormAPI.Controllers
                 }
 
                 _mapper.Map(userDto, existingUser);
-                await _userRepository.UpdateUser(existingUser);
+                await _userService.UpdateUser(existingUser);
                 return NoContent();
             }
             catch (Exception ex)
@@ -202,13 +202,13 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var user = await _userRepository.GetUserById(id);
+                var user = await _userService.GetUserById(id);
                 if (user == null)
                 {
                     return NotFound($"User with ID {id} not found");
                 }
 
-                await _userRepository.DeleteUser(id);
+                await _userService.DeleteUser(id);
                 return NoContent();
             }
             catch (Exception ex)
@@ -229,7 +229,7 @@ namespace FormAPI.Controllers
 
                 if (int.TryParse(userId, out int id))
                 {
-                    var user = await _userRepository.GetUserById(id);
+                    var user = await _userService.GetUserById(id);
                     if (user == null)
                     {
                         _logger.LogWarning("User with id {Id} not found", id);

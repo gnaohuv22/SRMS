@@ -1,0 +1,73 @@
+﻿@model IEnumerable<FormAPI.DTO.ResponseDto>
+
+@{
+    ViewData["Title"] = "Responses";
+}
+
+<h2>Responses</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Response ID</th>
+            <th>Form ID</th>
+            <th>Staff ID</th>
+            <th>Content</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var response in Model)
+        {
+            <tr>
+                <td>@response.ResponseId</td>
+                <td>@response.FormId</td>
+                <td>@response.StaffId</td>
+                <td>@response.Content</td>
+                <td>@response.CreatedAt</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@response.ResponseId">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@response.ResponseId">Edit</a> |
+                    <button class="btn btn-success" onclick="updateResponseStatus(@response.ResponseId, 'Accepted')">Accept</button> |
+                    <button class="btn btn-danger" onclick="updateResponseStatus(@response.ResponseId, 'Rejected')">Reject</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script type="text/javascript">
+        function updateResponseStatus(responseId, status) {
+            var reason = prompt("Please enter the reason for " + status + ":");
+            if (reason != null && reason != "") {
+                $.ajax({
+                    url: '@Url.Action("UpdateStatus", "Response")',
+                    type: 'POST',
+                    data: {
+                        id: responseId,
+                        status: status,
+                        reason: reason
+                    },
+                    success: function (result) {
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        alert("An error occurred while updating the response status.");
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess
 {
-    public class ResponseDAO
+    public class ResponseService
     {
         private readonly ApplicationDbContext _context;
 
-        public ResponseDAO(ApplicationDbContext context)
+        public ResponseService(ApplicationDbContext context)
         {
             _context = context;
         }

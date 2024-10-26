@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Repositories;
 using BusinessObject;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -7,6 +6,7 @@ using AutoMapper;
 using FormAPI.DTO;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using DataAccess;
 
 namespace FormAPI.Controllers
 {
@@ -14,13 +14,13 @@ namespace FormAPI.Controllers
     [ApiController]
     public class FormApiController : ControllerBase
     {
-        private readonly IFormRepository _formRepository;
+        private readonly FormService _formService;
         private readonly IMapper _mapper;
         private readonly ILogger<FormApiController> _logger;
 
-        public FormApiController(IFormRepository formRepository, IMapper mapper, ILogger<FormApiController> logger)
+        public FormApiController(FormService formService, IMapper mapper, ILogger<FormApiController> logger)
         {
-            _formRepository = formRepository ?? throw new ArgumentNullException(nameof(formRepository));
+            _formService = formService ?? throw new ArgumentNullException(nameof(formService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -31,7 +31,7 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var forms = await _formRepository.GetAllForms();
+                var forms = await _formService.GetAllForms();
                 return Ok(_mapper.Map<IEnumerable<FormDto>>(forms));
             }
             catch (Exception ex)
@@ -47,7 +47,7 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var forms = await _formRepository.GetFormsByStudentId(studentId);
+                var forms = await _formService.GetFormsByUserId(studentId);
                 return Ok(_mapper.Map<IEnumerable<FormDto>>(forms));
             }
             catch (Exception ex)
@@ -64,7 +64,7 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var form = await _formRepository.GetFormById(id);
+                var form = await _formService.GetFormById(id);
                 if (form == null)
                 {
                     return NotFound();
@@ -92,7 +92,7 @@ namespace FormAPI.Controllers
                 }
 
                 var form = _mapper.Map<Form>(formDto);
-                await _formRepository.AddForm(form);
+                await _formService.AddForm(form);
 
                 var createdForm = _mapper.Map<FormDto>(form);
                 return CreatedAtAction(
@@ -121,14 +121,14 @@ namespace FormAPI.Controllers
                     return BadRequest("ID mismatch");
                 }
 
-                var existingForm = await _formRepository.GetFormById(id);
+                var existingForm = await _formService.GetFormById(id);
                 if (existingForm == null)
                 {
                     return NotFound($"Form with ID {id} not found");
                 }
 
                 _mapper.Map(formDto, existingForm);
-                await _formRepository.UpdateForm(existingForm);
+                await _formService.UpdateForm(existingForm);
                 return NoContent();
             }
             catch (Exception ex)
@@ -146,12 +146,12 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var form = await _formRepository.GetFormById(id);
+                var form = await _formService.GetFormById(id);
                 if (form == null)
                 {
                     return NotFound($"Form with ID {id} not found");
                 }
-                await _formRepository.DeleteForm(id);
+                await _formService.DeleteForm(id);
                 return NoContent();
             }
             catch (Exception ex)

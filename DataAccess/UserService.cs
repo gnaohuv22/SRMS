@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess
 {
-    public class UserDAO
+    public class UserService
     {
         private readonly ApplicationDbContext _context;
 
-        public UserDAO(ApplicationDbContext context)
+        public UserService(ApplicationDbContext context)
         {
             _context = context;
         }

@@ -45,7 +45,11 @@ public class FormController : Controller
                     forms = Enumerable.Empty<FormDto>();
                 }
             }
-            else
+            //else if (User.IsInRole("Department"))
+            //{
+            //    //TODO: Implement Department logic later
+            //}
+            else 
             {
                 var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var response = await _httpClient.GetAsync($"{_apiBaseUrl}/forms/get-by-student?studentId={studentId}");

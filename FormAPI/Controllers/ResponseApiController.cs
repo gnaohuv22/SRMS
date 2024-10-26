@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Repositories;
 using BusinessObject;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -7,6 +6,7 @@ using AutoMapper;
 using FormAPI.DTO;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using DataAccess;
 
 namespace FormAPI.Controllers
 {
@@ -14,13 +14,13 @@ namespace FormAPI.Controllers
     [ApiController]
     public class ResponseApiController : ControllerBase
     {
-        private readonly IResponseRepository _responseRepository;
+        private readonly ResponseService _responseService;
         private readonly IMapper _mapper;
         private readonly ILogger<ResponseApiController> _logger;
 
-        public ResponseApiController(IResponseRepository responseRepository, IMapper mapper, ILogger<ResponseApiController> logger)
+        public ResponseApiController(ResponseService responseService, IMapper mapper, ILogger<ResponseApiController> logger)
         {
-            _responseRepository = responseRepository ?? throw new ArgumentNullException(nameof(responseRepository));
+            _responseService = responseService ?? throw new ArgumentNullException(nameof(responseService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -31,7 +31,7 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var responses = await _responseRepository.GetAllResponses();
+                var responses = await _responseService.GetAllResponses();
                 return Ok(_mapper.Map<IEnumerable<ResponseDto>>(responses));
             }
             catch (Exception ex)
@@ -48,7 +48,7 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var response = await _responseRepository.GetResponseById(id);
+                var response = await _responseService.GetResponseById(id);
                 if (response == null)
                 {
                     return NotFound($"Response with ID {id} not found");
@@ -76,7 +76,7 @@ namespace FormAPI.Controllers
                 }
 
                 var response = _mapper.Map<Response>(responseDto);
-                await _responseRepository.AddResponse(response);
+                await _responseService.AddResponse(response);
                 var createdResponse = _mapper.Map<ResponseDto>(response);
 
                 return CreatedAtAction(
@@ -105,14 +105,14 @@ namespace FormAPI.Controllers
                     return BadRequest("ID mismatch");
                 }
 
-                var existingResponse = await _responseRepository.GetResponseById(id);
+                var existingResponse = await _responseService.GetResponseById(id);
                 if (existingResponse == null)
                 {
                     return NotFound($"Response with ID {id} not found");
                 }
 
                 var response = _mapper.Map<Response>(responseDto);
-                await _responseRepository.UpdateResponse(response);
+                await _responseService.UpdateResponse(response);
 
                 return NoContent();
             }
@@ -131,12 +131,12 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var response = await _responseRepository.GetResponseById(id);
+                var response = await _responseService.GetResponseById(id);
                 if (response == null)
                 {
                     return NotFound($"Response with ID {id} not found");
                 }
-                await _responseRepository.DeleteResponse(id);
+                await _responseService.DeleteResponse(id);
                 return NoContent();
             }
             catch (Exception ex)

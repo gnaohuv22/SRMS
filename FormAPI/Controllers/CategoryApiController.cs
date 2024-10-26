@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Repositories;
 using BusinessObject;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -7,6 +6,7 @@ using AutoMapper;
 using FormAPI.DTO;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using DataAccess;
 
 namespace FormAPI.Controllers
 {
@@ -14,13 +14,13 @@ namespace FormAPI.Controllers
     [ApiController]
     public class CategoryApiController : ControllerBase
     {
-        private readonly ICategoryRepository _categoryRepository;
+        private readonly CategoryService _categoryService;
         private readonly IMapper _mapper;
         private readonly ILogger<CategoryApiController> _logger;
 
-        public CategoryApiController(ICategoryRepository categoryRepository, IMapper mapper, ILogger<CategoryApiController> logger)
+        public CategoryApiController(CategoryService categoryService, IMapper mapper, ILogger<CategoryApiController> logger)
         {
-            _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
+            _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -32,7 +32,7 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var categories = await _categoryRepository.GetAllCategories();
+                var categories = await _categoryService.GetAllCategories();
                 return Ok(_mapper.Map<IEnumerable<CategoryDto>>(categories));
             }
             catch (Exception ex)
@@ -49,7 +49,7 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var category = await _categoryRepository.GetCategoryById(id);
+                var category = await _categoryService.GetCategoryById(id);
                 if (category == null)
                 {
                     return NotFound();
@@ -77,7 +77,7 @@ namespace FormAPI.Controllers
                 }
 
                 var category = _mapper.Map<Category>(categoryDto);
-                await _categoryRepository.AddCategory(category);
+                await _categoryService.AddCategory(category);
 
                 var createdCategory = _mapper.Map<CategoryDto>(category);
                 return CreatedAtAction(
@@ -107,14 +107,14 @@ namespace FormAPI.Controllers
                     return BadRequest("ID mismatch");
                 }
 
-                var existingCategory = await _categoryRepository.GetCategoryById(id);
+                var existingCategory = await _categoryService.GetCategoryById(id);
                 if (existingCategory == null)
                 {
                     return NotFound($"Category with ID {id} not found");
                 }
 
                 var category = _mapper.Map<Category>(categoryDto);
-                await _categoryRepository.UpdateCategory(category);
+                await _categoryService.UpdateCategory(category);
                 return NoContent();
             }
             catch (Exception ex)
@@ -132,12 +132,12 @@ namespace FormAPI.Controllers
         {
             try
             {
-                var category = await _categoryRepository.GetCategoryById(id);
+                var category = await _categoryService.GetCategoryById(id);
                 if (category == null)
                 {
                     return NotFound($"Category with ID {id} not found");
                 }
-                await _categoryRepository.DeleteCategory(id);
+                await _categoryService.DeleteCategory(id);
                 return NoContent();
             }
             catch (Exception ex)

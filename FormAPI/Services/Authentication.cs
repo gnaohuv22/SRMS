@@ -1,5 +1,5 @@
 ﻿using BusinessObject;
-using Repositories;
+using DataAccess;
 using System.Security.Claims;
 
 namespace FormAPI.Services
@@ -12,25 +12,25 @@ namespace FormAPI.Services
     }
     public class Authentication : IAuthentication
     {
-        private readonly IUserRepository _userRepository;
+        private readonly UserService _userService;
 
-        public Authentication(IUserRepository userRepository)
+        public Authentication(UserService userService)
         {
-            _userRepository = userRepository;
+            _userService = userService;
         }
 
         public async Task<User?> Login(string email)
         {
-            var entry = await _userRepository.GetUserByEmail(email);
+            var entry = await _userService.GetUserByEmail(email);
             return entry;
         }
 
         public async Task<bool> Register(User user)
         {
-            var entry = await _userRepository.GetUserByEmail(user.Email);
+            var entry = await _userService.GetUserByEmail(user.Email);
             if (entry == null)
             {
-                await _userRepository.AddUser(user);
+                await _userService.AddUser(user);
                 return true;
             }
             return false;
@@ -41,7 +41,7 @@ namespace FormAPI.Services
             var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
             if (int.TryParse(userId, out int id))
             {
-                return await _userRepository.GetUserById(id);
+                return await _userService.GetUserById(id);
             }
             return null;
         }
