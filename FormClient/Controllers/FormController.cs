@@ -45,14 +45,25 @@ public class FormController : Controller
                     forms = Enumerable.Empty<FormDto>();
                 }
             }
-            //else if (User.IsInRole("Department"))
-            //{
-            //    //TODO: Implement Department logic later
-            //}
+            else if (User.IsInRole("Department"))
+            {
+                var departmentId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var response = await _httpClient.GetAsync($"{_apiBaseUrl}/forms/get-by-user-department-id?userId={departmentId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    forms = await response.Content.ReadFromJsonAsync<IEnumerable<FormDto>>();
+                }
+                else
+                {
+                    _logger.BeginScope("Failed to retrieve forms for department ID {StudentId}. Status code: {StatusCode}", departmentId, response.StatusCode);
+                    TempData["Error"] = "Failed to retrieve forms.";
+                    forms = Enumerable.Empty<FormDto>();
+                }
+            }
             else 
             {
-                var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}/forms/get-by-student?studentId={studentId}");
+                var studentId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var response = await _httpClient.GetAsync($"{_apiBaseUrl}/forms/get-by-user-id?userId={studentId}");
                 if (response.IsSuccessStatusCode)
                 {
                     forms = await response.Content.ReadFromJsonAsync<IEnumerable<FormDto>>();

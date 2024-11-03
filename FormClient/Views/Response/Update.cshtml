@@ -1,0 +1,54 @@
+﻿@model UpdateResponseViewModel
+@{
+    ViewData["Title"] = "Update Response";
+}
+<h2>Update Response</h2>
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Form Details</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Form ID:</dt>
+                    <dd class="col-sm-9">@Model.Form.FormId</dd>
+                    <dt class="col-sm-3">Subject:</dt>
+                    <dd class="col-sm-9">@Model.Form.Subject</dd>
+                    <dt class="col-sm-3">Current Status:</dt>
+                    <dd class="col-sm-9">@Model.Form.Status</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Current Response</h5>
+            </div>
+            <div class="card-body">
+                <pre class="form-control" style="white-space: pre-wrap;">@Model.Response.Content</pre>
+            </div>
+        </div>
+
+        <form asp-action="UpdateStatus" method="post">
+            <input type="hidden" asp-for="Response.ResponseId" />
+            <div class="form-group mb-3">
+                <label class="form-label">Update Status</label>
+                <select asp-for="Status" class="form-control" required>
+                    <option value="">Select Status</option>
+                    <option value="Accepted">Accept</option>
+                    <option value="Rejected">Reject</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">Reason for Update</label>
+                <textarea asp-for="Reason" class="form-control" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Update Response</button>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>

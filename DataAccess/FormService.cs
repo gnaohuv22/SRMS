@@ -55,12 +55,22 @@ namespace DataAccess
             }
         }
 
+        public async Task<IEnumerable<Form>> GetFormsByUserDepartmentId(int departmentId)
+        {
+            return await _context.Forms
+                .Include(f => f.User)
+                .Include(f => f.Category)
+                .Where(f => f.Category.DepartmentUserId == departmentId)
+                .OrderByDescending(f => f.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Form>> GetFormsByUserId(int userId)
         {
             return await _context.Forms
                 .Include(f => f.User)
                 .Include(f => f.Category)
-                .Where(f => f.StudentId == userId)
+                .Where(f => f.User.UserId == userId)
                 .OrderByDescending(f => f.CreatedAt)
                 .ToListAsync();
         }
@@ -123,6 +133,14 @@ namespace DataAccess
                 AcceptedForms = forms.Count(f => f.Status == FormStatus.Accepted),
                 RejectedForms = forms.Count(f => f.Status == FormStatus.Rejected)
             };
+        }
+
+        public async Task<Response> GetResponseByFormId(int formId)
+        {
+            var response = await _context.Responses
+                .Where(r => r.FormId == formId)
+                .FirstOrDefaultAsync();
+            return response;
         }
     }
 

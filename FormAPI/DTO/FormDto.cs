@@ -28,5 +28,7 @@ namespace FormAPI.DTO
         public string? CategoryName { get; set; }
         [BindNever]
         public string? StudentEmail { get; set; }
+        [BindNever]
+        public bool HasResponse { get; set; }
     }
 }

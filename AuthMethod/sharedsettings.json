@@ -1,8 +1,0 @@
-{
-  "Jwt": {
-    "Key": "ab_con_bong_ngu_dmnguyenminhhang",
-    "Issuer": "Testify",
-    "Audience": "AnotherTestify",
-    "DurationInDays": 15
-  }
-}

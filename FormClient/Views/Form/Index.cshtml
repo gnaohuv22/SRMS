@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<FormAPI.DTO.FormDto>
 @using System.Security.Claims
+@using BusinessObject
 
 @{
     ViewData["Title"] = "Forms";
@@ -42,13 +43,23 @@
 
                     @if (User.IsInRole("Student") && form.StudentId.ToString() == User.FindFirst(ClaimTypes.NameIdentifier)?.Value)
                     {
+                        <span> | </span>
                         <a asp-action="Edit" asp-route-id="@form.FormId">Edit</a>
+                        <span> | </span>
                         <a asp-action="Delete" asp-route-id="@form.FormId">Delete</a>
                     }
 
                     @if (User.IsInRole("Department"))
                     {
-                        <a asp-action="Reply" asp-controller="Response" asp-route-formId="@form.FormId">Reply</a>
+                        <span> | </span>
+                        @if (form.Status == FormStatus.Processing)
+                        {
+                            <a asp-action="Update" asp-route-id="@form.FormId">Update</a> <span> | </span>
+                        }
+                        @if (form.Status == FormStatus.Pending && !form.HasResponse)
+                        {
+                            <a asp-action="Reply" asp-route-formId="@form.FormId">Reply</a>
+                        }
                     }
                 </td>
             </tr>

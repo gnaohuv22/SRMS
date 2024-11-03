@@ -32,6 +32,13 @@ namespace FormAPI.Controllers
             try
             {
                 var forms = await _formService.GetAllForms();
+                var formDtos = _mapper.Map<IEnumerable<FormDto>>(forms);
+
+                foreach (var formDto in formDtos)
+                {
+                    var response = await _formService.GetResponseByFormId(formDto.FormId);
+                    formDto.HasResponse = response != null;
+                }
                 return Ok(_mapper.Map<IEnumerable<FormDto>>(forms));
             }
             catch (Exception ex)
@@ -41,18 +48,34 @@ namespace FormAPI.Controllers
             }
         }
 
-        [HttpGet("get-by-student")]
+        [HttpGet("get-by-user-id")]
         [ProducesResponseType(typeof(IEnumerable<FormDto>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<IEnumerable<FormDto>>> GetFormsByStudentId(int studentId)
+        public async Task<ActionResult<IEnumerable<FormDto>>> GetFormsByStudentId(int userId)
         {
             try
             {
-                var forms = await _formService.GetFormsByUserId(studentId);
+                var forms = await _formService.GetFormsByUserId(userId);
                 return Ok(_mapper.Map<IEnumerable<FormDto>>(forms));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while getting all forms");
+                _logger.LogError(ex, "Error occurred while getting forms in Student Role");
+                return StatusCode(500, "An error occurred while processing your request");
+            }
+        }
+
+        [HttpGet("get-by-user-department-id")]
+        [ProducesResponseType(typeof(IEnumerable<FormDto>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<FormDto>>> GetFormsByDepartmentId(int userId)
+        {
+            try
+            {
+                var forms = await _formService.GetFormsByUserDepartmentId(userId);
+                return Ok(_mapper.Map<IEnumerable<FormDto>>(forms));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting forms in Department Role");
                 return StatusCode(500, "An error occurred while processing your request");
             }
         }
