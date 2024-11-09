@@ -22,10 +22,6 @@ builder.Services.AddLogging(loggingBuilder =>
         .SetMinimumLevel(LogLevel.Debug);
 });
 
-//Add shared configuration file
-var sharedSettingsPath = Path.Combine(builder.Environment.ContentRootPath, "..", "AuthMethod", "sharedsettings.json");
-builder.Configuration.AddJsonFile(sharedSettingsPath, optional: false, reloadOnChange: true);
-
 // Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

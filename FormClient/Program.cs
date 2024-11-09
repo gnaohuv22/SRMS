@@ -1,14 +1,8 @@
 
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using SharedAuth;
 
 var builder = WebApplication.CreateBuilder(args);
-
-//Add shared configuration file
-var sharedSettingsPath = Path.Combine(builder.Environment.ContentRootPath, "..", "AuthMethod", "sharedsettings.json");
-builder.Configuration.AddJsonFile(sharedSettingsPath, optional: false, reloadOnChange: true);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

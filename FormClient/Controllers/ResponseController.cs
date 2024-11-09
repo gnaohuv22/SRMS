@@ -27,6 +27,7 @@ namespace FormClient.Controllers
         }
 
         // GET: Response
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             try
@@ -51,6 +52,7 @@ namespace FormClient.Controllers
         }
 
         // GET: Response/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int id)
         {
             try

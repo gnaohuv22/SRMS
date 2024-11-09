@@ -16,10 +16,8 @@ namespace DataAccess
                 .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "..", "FormAPI"))
                 .AddJsonFile("appsettings.json")
                 .Build();
-
             // Get connection string from configuration
             var connectionString = configuration.GetConnectionString("DefaultConnection");
-
             // Configure the DbContext with the connection string
             optionsBuilder.UseSqlServer(connectionString);
 

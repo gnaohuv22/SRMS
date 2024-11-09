@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace FormClient.Controllers
-{
+{   
+
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

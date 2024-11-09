@@ -58,7 +58,7 @@
                         }
                         @if (form.Status == FormStatus.Pending && !form.HasResponse)
                         {
-                            <a asp-action="Reply" asp-route-formId="@form.FormId">Reply</a>
+                            <a asp-controller="Response" asp-action="Reply" asp-route-formId="@form.FormId">Reply</a>
                         }
                     }
                 </td>
