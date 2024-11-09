@@ -37,10 +37,7 @@
                 <td>@response.Content</td>
                 <td>@response.CreatedAt</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@response.ResponseId">Details</a> |
-                    <a asp-action="Edit" asp-route-id="@response.ResponseId">Edit</a> |
-                    <button class="btn btn-success" onclick="updateResponseStatus(@response.ResponseId, 'Accepted')">Accept</button> |
-                    <button class="btn btn-danger" onclick="updateResponseStatus(@response.ResponseId, 'Rejected')">Reject</button>
+                    <a asp-action="Details" asp-route-id="@response.ResponseId">Details</a> 
                 </td>
             </tr>
         }

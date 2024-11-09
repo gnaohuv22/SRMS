@@ -21,14 +21,29 @@
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Reply">
+            
             <div class="form-group">
                 <label asp-for="Content" class="control-label"></label>
                 <textarea asp-for="Content" class="form-control"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
-            <input type="hidden" asp-for="FormId" value="@Model.FormId"/>
+
+            <input type="hidden" asp-for="FormId" value="@Model.FormId" />
             <input type="hidden" asp-for="FormSubject" value="@Model.FormSubject" />
             <input type="hidden" asp-for="FormContent" value="@Model.FormContent" />
+
+            <div class="form-group">
+                <label class="control-label">Response Type</label>
+                <div>
+                    <input type="radio" asp-for="Status" value="2" id="accept" />
+                    <label for="accept">Accept</label>
+
+                    <input type="radio" asp-for="Status" value="3" id="decline" />
+                    <label for="decline">Decline</label>
+                </div>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+
             <div class="form-group">
                 <input type="submit" value="Submit" class="btn btn-primary" />
             </div>

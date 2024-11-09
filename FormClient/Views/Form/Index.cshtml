@@ -43,10 +43,13 @@
 
                     @if (User.IsInRole("Student") && form.StudentId.ToString() == User.FindFirst(ClaimTypes.NameIdentifier)?.Value)
                     {
-                        <span> | </span>
-                        <a asp-action="Edit" asp-route-id="@form.FormId">Edit</a>
-                        <span> | </span>
-                        <a asp-action="Delete" asp-route-id="@form.FormId">Delete</a>
+                        @if(form.Status == 0)
+                        {
+                            <span> | </span>
+                            <a asp-action="Edit" asp-route-id="@form.FormId">Edit</a>
+                            <span> | </span>
+                            <a asp-action="Delete" asp-route-id="@form.FormId">Delete</a>
+                        }
                     }
 
                     @if (User.IsInRole("Department"))
@@ -54,7 +57,7 @@
                         <span> | </span>
                         @if (form.Status == FormStatus.Processing)
                         {
-                            <a asp-action="Update" asp-route-id="@form.FormId">Update</a> <span> | </span>
+                            <a asp-controller="Response" asp-action="Update" asp-route-id="@form.FormId">Update</a> <span> | </span>
                         }
                         @if (form.Status == FormStatus.Pending && !form.HasResponse)
                         {
@@ -67,4 +70,8 @@
     </tbody>
 </table>
 
-<a asp-action="Create" class="btn btn-primary">Create New Form</a>
+@if (User.IsInRole("Student"))
+{
+    <a asp-action="Create" class="btn btn-primary">Create New Form</a>
+}
+

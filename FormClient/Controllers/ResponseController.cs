@@ -93,7 +93,7 @@ namespace FormClient.Controllers
                     TempData["Error"] = "Form not found.";
                     return NotFound();
                 }
-                var exitstingResponse = await _httpClient.GetAsync($"{_apiBaseUrl}/responses?formId={formId}");
+                var exitstingResponse = await _httpClient.GetAsync($"{_apiBaseUrl}/responses/byForm?formId={formId}");
                 if (exitstingResponse.IsSuccessStatusCode)
                 {
                     TempData["Error"] = "This form has already been replied to.";
@@ -117,7 +117,7 @@ namespace FormClient.Controllers
             
         }
 
-        // POST: Response/Create
+        // POST: Response/Reply
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Department")]
@@ -150,7 +150,8 @@ namespace FormClient.Controllers
                     return NotFound();
                 }
 
-                formResponse.Status = FormStatus.Processing;
+                // Update form status based on radio selection
+                formResponse.Status = (FormStatus)replyViewModel.Status;
                 await _httpClient.PutAsJsonAsync($"{_apiBaseUrl}/forms/{responseDto.FormId}", formResponse);
 
                 var response = await _httpClient.PostAsJsonAsync($"{_apiBaseUrl}/responses", responseDto);
@@ -171,6 +172,8 @@ namespace FormClient.Controllers
                 return View(replyViewModel);
             }
         }
+
+
 
         [HttpPost]
         [Authorize(Roles = "Department")]
@@ -271,7 +274,7 @@ namespace FormClient.Controllers
 
         private async Task<(FormDto form, ResponseDto response)> GetFormAndResponseData(int id)
         {
-            var response = await _httpClient.GetFromJsonAsync<ResponseDto>($"{_apiBaseUrl}/responses/{id}");
+            var response = await _httpClient.GetFromJsonAsync<ResponseDto>($"{_apiBaseUrl}/responses/byForm?formId={id}");
             if (response == null)
             {
                 TempData["Error"] = "Response not found.";
@@ -350,7 +353,7 @@ namespace FormClient.Controllers
         }
     }
 
-    internal class UpdateResponseViewModel
+    public class UpdateResponseViewModel
     {
         public FormDto Form { get; set; }
         public ResponseDto Response { get; set; }
@@ -362,6 +365,7 @@ namespace FormClient.Controllers
     {
         public string Content { get; set; }
         public int FormId { get; set; }
+        public int Status { get; set; }
         public string FormSubject { get; set; }
         public string FormContent { get; set; }
     }

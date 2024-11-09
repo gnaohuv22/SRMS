@@ -15,14 +15,16 @@ namespace FormAPI.Controllers
     public class ResponseApiController : ControllerBase
     {
         private readonly ResponseService _responseService;
+        private readonly FormService _formService;
         private readonly IMapper _mapper;
         private readonly ILogger<ResponseApiController> _logger;
 
-        public ResponseApiController(ResponseService responseService, IMapper mapper, ILogger<ResponseApiController> logger)
+        public ResponseApiController(ResponseService responseService, IMapper mapper, ILogger<ResponseApiController> logger, FormService formService)
         {
             _responseService = responseService ?? throw new ArgumentNullException(nameof(responseService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _formService = formService;
         }
 
         [HttpGet]
@@ -139,6 +141,26 @@ namespace FormAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while deleting response with id {ResponseId}", id);
+                return StatusCode(500, "An error occurred while processing your request");
+            }
+        }
+
+        [HttpGet("byForm")]
+        [ProducesResponseType(typeof(IEnumerable<ResponseDto>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<ResponseDto>>> GetResponseByFormId([FromQuery] int formId)
+        {
+            try
+            {
+                var response = await _formService.GetResponseByFormId(formId);
+                if (response == null)
+                {
+                    return NotFound();
+                }
+                return Ok(_mapper.Map<IEnumerable<ResponseDto>>(response));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting response by form ID");
                 return StatusCode(500, "An error occurred while processing your request");
             }
         }
